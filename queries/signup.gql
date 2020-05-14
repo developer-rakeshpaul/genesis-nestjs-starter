@@ -1,0 +1,17 @@
+#import "./user.fragment.gql"
+
+mutation Signup($data: UserCreateInput!) {
+  signup(userCreateInput: $data) {
+    ... on AuthPayload {
+      user {
+        ...UserInfo
+      }
+      token
+      tokenExpiry
+    }
+    ... on ValidationResult {
+      message
+      code
+    }
+  }
+}

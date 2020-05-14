@@ -1,0 +1,15 @@
+mutation ConfirmUser($token: String!) {
+  confirm(token: $token) {
+    ... on ValidationResult {
+      message
+      code
+    }
+    ... on ActionResult {
+      success
+    }
+  }
+}
+
+# {
+#   "token": "a7d1ea49-6406-4595-b4d8-e6b611ce4a60"
+# }

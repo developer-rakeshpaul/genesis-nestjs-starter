@@ -1,0 +1,23 @@
+# import "./user.fragment.gql"
+
+mutation login($email: String!, $password: String) {
+  login(email: $email, password: $password) {
+    ... on AuthPayload {
+      user {
+        ...UserInfo
+      }
+      token
+      tokenExpiry
+    }
+    ... on ValidationResult {
+      message
+      code
+    }
+  }
+}
+
+# {
+#   "email": "sampleuser@x.com",
+#   "password": "password"
+# }
+#

@@ -1,0 +1,11 @@
+mutation ResendConfirmEmail($email: String!) {
+  resendConfirm(email: $email) {
+    ... on ValidationResult {
+      message
+      code
+    }
+    ... on ActionResult {
+      success
+    }
+  }
+}

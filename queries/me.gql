@@ -1,0 +1,12 @@
+#import "./user.fragment.gql"
+query Me {
+  me {
+    ... on User {
+      ...UserInfo
+    }
+    ... on ValidationResult {
+      code
+      message
+    }
+  }
+}

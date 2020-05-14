@@ -1,0 +1,19 @@
+fragment UserInfo on User {
+  id
+  name
+  email
+  role
+  status
+  bio
+  lastLoginAt
+  workspaces {
+    id
+  }
+  memberOf {
+    workspaceId
+  }
+  projects {
+    id
+    title
+  }
+}
