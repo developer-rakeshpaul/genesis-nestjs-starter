@@ -33,7 +33,6 @@ export class GraphqlOptions implements GqlOptionsFactory {
         const errId = v4();
         console.log('errId: ', errId);
         console.log(JSON.stringify(error, null, 2));
-
         return new GraphQLError(`Internal Error: ${errId} => ${error.message}`);
       },
       definitions: {

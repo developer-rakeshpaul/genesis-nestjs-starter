@@ -1,3 +1,4 @@
+import { StatusWithInfo } from './types/status.info.type';
 import { UseGuards } from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { JwtService } from '@nestjs/jwt';
@@ -32,6 +33,7 @@ import {
 } from './dto/user.union.types';
 import { User } from './models/user.entity';
 import { UserService } from './user.service';
+import { getTestMessageUrl } from 'nodemailer';
 
 // const emptyValidationResult = { code: null, message: null };
 // const emptyAuthPayload = { token: null, tokenExpiry: null, user: null };
@@ -53,6 +55,7 @@ export class UserResolver {
     @Args() loginArgs: LoginArgs,
     @Context() ctx,
   ): Promise<typeof LoginResult> {
+    console.log(ctx.req.user);
     const { email, password } = loginArgs;
     const user: User = await this.authService.validateUser(email, password);
 
@@ -103,24 +106,30 @@ export class UserResolver {
     }
   }
 
-  @Mutation(() => Boolean)
-  async sendLoginOTP(@Args('email') email: string): Promise<boolean> {
+  @Mutation(() => StatusWithInfo)
+  async sendLoginOTP(@Args('email') email: string): Promise<StatusWithInfo> {
     // send mail with defined transport object
     try {
       const user: User = await this.userService.findByEmail(email);
       if (!user) {
-        return false;
+        return { status: false };
       }
-      const info = this.mailService.sendOTPEmail(
+      const info = await this.mailService.sendOTPEmail(
         email,
         user.id,
         'Login OTP for Genesis',
       );
-      return info !== null;
+      return {
+        status: info !== null,
+        info: {
+          email,
+          url: getTestMessageUrl(info),
+        },
+      };
     } catch (error) {
       this.appService.handleInternalError(error);
+      return { status: false };
     }
-    return false;
   }
 
   @Mutation(() => LoginResult)
@@ -226,24 +235,6 @@ export class UserResolver {
         secure,
         domain: secure ? '.genesis.dev' : 'localhost',
       });
-      ctx.res.cookie('selectedProjectId', '', {
-        httpOnly: true,
-        expires: new Date(0),
-        secure,
-        domain: secure ? '.genesis.dev' : 'localhost',
-      });
-      ctx.res.cookie('selectedWorkspaceId', '', {
-        httpOnly: true,
-        expires: new Date(0),
-        secure,
-        domain: secure ? '.genesis.dev' : 'localhost',
-      });
-      ctx.res.cookie('selectedProjectContentId', '', {
-        httpOnly: true,
-        expires: new Date(0),
-        secure,
-        domain: secure ? '.genesis.dev' : 'localhost',
-      });
 
       return true;
     } catch (error) {
@@ -272,11 +263,17 @@ export class UserResolver {
           code: USER_VALIDATION_ERROR.EMAIL_NOT_VERIFIED,
         };
       }
-      const result = await this.mailService.sendForgotPasswordEmail(
+      const info = await this.mailService.sendForgotPasswordEmail(
         email,
         user.id,
       );
-      return { success: result !== null };
+      return {
+        success: info !== null,
+        info: {
+          email,
+          url: getTestMessageUrl(info),
+        },
+      };
     } catch (error) {
       this.appService.handleInternalError(error);
     }
@@ -398,7 +395,7 @@ export class UserResolver {
   @Mutation(() => SignupResult)
   async signup(
     @Args('userCreateInput') userCreateInput: UserCreateInput,
-    // @Context() ctx,
+    @Context() ctx,
   ): Promise<typeof SignupResult> {
     try {
       const { email, username, password } = userCreateInput;
@@ -437,24 +434,28 @@ export class UserResolver {
           user.email,
           user.id,
         );
-        // const loginToken = await this.authService.createToken(user);
-        // const tokenExpiry = new Date(
-        //   new Date().getTime() +
-        //     get(
-        //       this.configService.get('jwt'),
-        //       'accessToken.options.expiresIn',
-        //       15 * 60,
-        //     ) *
-        //       1000,
-        // );
-        // delete user.password;
-        // const refreshToken = await this.authService.createRefreshToken(user);
-        // this.authService.sendRefreshToken(
-        //   ctx.res,
-        //   refreshToken,
-        //   this.configService.get('jwt'),
-        // );
-        // return { token: loginToken, tokenExpiry, user };
+        console.log(this.configService.get('api').verificationRequired);
+        if (!this.configService.get('api').verificationRequired) {
+          const loginToken = await this.authService.createToken(user);
+          const tokenExpiry = new Date(
+            new Date().getTime() +
+              get(
+                this.configService.get('jwt'),
+                'accessToken.options.expiresIn',
+                15 * 60,
+              ) *
+                1000,
+          );
+          delete user.password;
+          const refreshToken = await this.authService.createRefreshToken(user);
+          this.authService.sendRefreshToken(
+            ctx.res,
+            refreshToken,
+            this.configService.get('jwt'),
+          );
+          return { token: loginToken, tokenExpiry, user };
+        }
+
         return { token: '', tokenExpiry: new Date(0), user };
       }
     } catch (error) {
@@ -502,12 +503,18 @@ export class UserResolver {
       if (!user) {
         return { success: false };
       }
-      const result = await this.mailService.sendConfirmationEmail(
+      const info = await this.mailService.sendConfirmationEmail(
         user.name,
         email,
         user.id,
       );
-      return { success: result !== null };
+      return {
+        success: info !== null,
+        info: {
+          email,
+          url: getTestMessageUrl(info),
+        },
+      };
     } catch (error) {
       this.appService.thorwInternalError(error);
     }

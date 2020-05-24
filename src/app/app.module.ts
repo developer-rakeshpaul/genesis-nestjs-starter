@@ -20,6 +20,7 @@ import { UserModule } from './modules/user';
     ConfigModule.load(resolve(__dirname, '../config', '**/!(*.d).{ts,js}')),
     GraphQLModule.forRootAsync({
       useClass: GraphqlOptions,
+      
     }),
     JwtModule.registerAsync({
       useFactory: (config: ConfigService) => config.get('jwt').accessToken,

@@ -1,10 +1,10 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { ObjectType, Field } from "@nestjs/graphql";
 import { GraphQLJSONObject } from 'graphql-type-json';
 
 @ObjectType()
-export class ActionResult {
+export class StatusWithInfo {
   @Field()
-  success: boolean;
+  status: boolean;
 
   @Field(() => GraphQLJSONObject)
   info?: any

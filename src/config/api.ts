@@ -5,14 +5,11 @@ export default {
   host: process.env.HOST,
   web: process.env.WEB,
   confirmPath: process.env.CONFIRM_PATH,
-  collaboratorConfirmPath: process.env.COLLABORATOR_CONFIRM_PATH,
   forgetPath: process.env.FORGOT_PASSWORD_PATH,
   isSecure: process.env.IS_SECURE === 'true',
   secret: process.env.APP_SECRET,
   environment: process.env.NODE_ENV,
-  magicCodeExpiry: process.env.MAGIC_CODE_EXPIRY
-    ? +process.env.MAGIC_CODE_EXPIRY
-    : 60,
+  verficationRequired: process.env.LOGIN_WITHOUT_VERIFICATION === 'true',
   emails() {
     if (process.env.SUPER_ADMIN_EMAILS) {
       return process.env.SUPER_ADMIN_EMAILS.split(',');
@@ -34,19 +31,7 @@ export default {
   confirmUrl() {
     return `${this.get('api').webUrl()}${this.get('api.confirmPath')}`;
   },
-
-  collaboratorConfirmUrl() {
-    return `${this.get('api').webUrl()}${this.get(
-      'api.collaboratorConfirmPath',
-    )}`;
-  },
   forgetUrl() {
     return `${this.get('api').webUrl()}${this.get('api.forgetPath')}`;
-  },
-  projectTypeTitles() {
-    if (process.env.PROJECT_TYPE_TITLES) {
-      return process.env.PROJECT_TYPE_TITLES.split(',');
-    }
-    return ['The Past in My Place', 'A Life in Time'];
   },
 };
