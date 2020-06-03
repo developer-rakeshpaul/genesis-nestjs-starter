@@ -1,4 +1,5 @@
-export default {
+import { registerAs } from '@nestjs/config';
+export default registerAs('mailer', () => ({
   useTestAccount: process.env.MAILER_USE_TEST_ACCOUNT === 'true',
   transport: {
     type: process.env.MAILER_TYPE || 'smtp',
@@ -20,6 +21,6 @@ export default {
   },
   templateDir: './templates',
   from() {
-    return this.get('mailer.transport.auth.user');
+    return this.mailer.transport.auth.user;
   },
-};
+}));

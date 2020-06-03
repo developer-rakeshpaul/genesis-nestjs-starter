@@ -1,13 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
-import { config } from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import 'module-alias/register';
 import { AppModule } from './app/app.module';
-config();
-
 // Startup
 (async function bootstrap() {
   try {

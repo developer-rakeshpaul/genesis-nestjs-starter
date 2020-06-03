@@ -2,7 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigService } from 'nestjs-config';
+import { ConfigService } from '@nestjs/config';
 import { RedisModule } from 'nestjs-redis';
 import { User } from './../user/models/user.entity';
 import { UserModule } from './../user/user.module';

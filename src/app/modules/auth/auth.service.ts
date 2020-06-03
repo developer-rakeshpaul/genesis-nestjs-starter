@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthenticationError } from 'apollo-server';
 import { Response } from 'express';
 import get from 'lodash.get';
-import { ConfigService } from 'nestjs-config';
+import { ConfigService } from '@nestjs/config';
 import { User } from '../../modules/user/models/user.entity';
 import { UserService } from '../user/user.service';
 import { CryptoService } from './crypto.service';
@@ -24,6 +24,8 @@ export class AuthService {
         // status: USER_STATUS_ACTIVE,
       },
     });
+    if (!user) return null;
+
     const valid = await this.cryptoService.checkPassword(
       user.password,
       password,

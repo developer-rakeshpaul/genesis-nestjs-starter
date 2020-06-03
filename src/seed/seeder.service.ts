@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from 'nestjs-config';
+import { ConfigService } from '@nestjs/config';
 import { USER_STATUS_ACTIVE } from './../app/constants';
 /* eslint-disable @typescript-eslint/camelcase */
 import { User } from './../app/modules/user/models/user.entity';

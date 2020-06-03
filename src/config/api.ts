@@ -1,4 +1,6 @@
-export default {
+import { registerAs } from '@nestjs/config';
+
+export default registerAs('api', () => ({
   name: process.env.NAME,
   port: +process.env.API_PORT,
   domain: process.env.DOMAIN,
@@ -17,21 +19,21 @@ export default {
     return ['accounts@genesis.dev'];
   },
   isProduction() {
-    return this.get('api.environment') === 'production';
+    return this.environment === 'production';
   },
   protocol() {
-    return this.get('api.isSecure') ? 'https' : 'http';
+    return this.isSecure ? 'https' : 'http';
   },
   webUrl() {
-    return `${this.get('api').protocol()}://${this.get('api.web')}`;
+    return `${this.protocol()}://${this.web}`;
   },
   apiUrl() {
-    return `${this.get('api').protocol()}://${this.get('api.host')}`;
+    return `${this.protocol()}://${this.host}`;
   },
   confirmUrl() {
-    return `${this.get('api').webUrl()}${this.get('api.confirmPath')}`;
+    return `${this.webUrl()}${this.confirmPath}`;
   },
   forgetUrl() {
-    return `${this.get('api').webUrl()}${this.get('api.forgetPath')}`;
+    return `${this.webUrl()}${this.forgetPath}`;
   },
-};
+}));

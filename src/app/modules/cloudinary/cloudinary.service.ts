@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { v2 } from 'cloudinary';
-import { ConfigService } from 'nestjs-config';
-import { CloudinaryDeleteResponse } from './../../../core/types/cloudinary.delete.response.type';
+import { ConfigService } from '@nestjs/config';
+import { CloudinaryDeleteResponse } from '../../../core/types/cloudinary.delete.response.model';
 import isEqual from 'lodash.isequal';
 
 @Injectable()

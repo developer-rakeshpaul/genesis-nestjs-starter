@@ -13,7 +13,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
 import get from 'lodash.get';
-import { ConfigService } from 'nestjs-config';
+import { ConfigService } from '@nestjs/config';
 import { User } from './../user/models/user.entity';
 import { UserService } from './../user/user.service';
 import { AuthService } from './auth.service';
@@ -61,7 +61,6 @@ export class AuthController {
         get(this.config.get('jwt'), 'accessToken.options.expiresIn', 15 * 60) *
           1000,
     );
-    delete user.password;
     const refreshToken = await this.authService.createRefreshToken(user);
     const refreshTokenExpiry = new Date(
       new Date().getTime() +
@@ -78,12 +77,6 @@ export class AuthController {
       this.config.get('jwt'),
     );
 
-    let userKeys = Object.keys(user);
-    userKeys = userKeys.filter((key) => key.indexOf('__') === -1);
-    const workspaces = get(user, '__workspaces__', []);
-    const memberOf = get(user, '__memberOf__', []);
-    const projects = get(user, '__projects__', []);
-
     delete user.tokenVersion;
 
     res.json({
@@ -91,12 +84,7 @@ export class AuthController {
       // refreshToken,
       tokenExpiry,
       refreshTokenExpiry,
-      user: {
-        ...pick(user, userKeys),
-        workspaces,
-        memberOf,
-        projects,
-      },
+      user,
     });
   }
 

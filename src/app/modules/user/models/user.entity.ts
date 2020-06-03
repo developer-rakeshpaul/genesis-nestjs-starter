@@ -1,14 +1,14 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, HideField, ID, ObjectType } from '@nestjs/graphql';
 import GraphQLJSON from 'graphql-type-json';
 import {
   BaseEntity,
   Column,
   CreateDateColumn,
+  Entity,
+  Index,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-  Index,
-  Entity,
-  OneToMany,
 } from 'typeorm';
 import { Todo } from './todo.entity';
 
@@ -57,6 +57,7 @@ export class User extends BaseEntity {
   })
   email: string;
 
+  @HideField()
   @Column('text', {
     nullable: false,
     name: 'password',
@@ -141,6 +142,7 @@ export class User extends BaseEntity {
   })
   role?: string;
 
+  @HideField()
   @Column('integer', {
     nullable: true,
     default: () => 1,
@@ -171,7 +173,7 @@ export class User extends BaseEntity {
   updatedAt: Date | null;
 
   @OneToMany(() => Todo, (todo) => todo.createdBy, { lazy: true })
-  todos: Promise<Todo[]>;
+  todos: Todo[];
 }
 
 export default User;

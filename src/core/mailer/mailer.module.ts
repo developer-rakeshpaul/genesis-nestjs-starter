@@ -1,6 +1,6 @@
 import { MailerModule } from '@nest-modules/mailer';
 import { Module } from '@nestjs/common';
-import { ConfigService } from 'nestjs-config';
+import { ConfigService } from '@nestjs/config';
 import { RedisModule } from 'nestjs-redis';
 import { MailService } from './mailer.service';
 

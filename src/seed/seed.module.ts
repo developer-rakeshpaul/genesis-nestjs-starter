@@ -1,7 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from 'nestjs-config';
-import { resolve } from 'path';
 import { AuthModule } from '../app/modules/auth/auth.module';
 import { User } from '../app/modules/user/models/user.entity';
 import { UserService } from '../app/modules/user/user.service';
@@ -12,7 +11,6 @@ import { SeederService } from './seeder.service';
 
 @Module({
   imports: [
-    ConfigModule.load(resolve(__dirname, '../config', '**/!(*.d).{ts,js}')),
     TypeOrmModule.forRootAsync({
       useFactory: (config: ConfigService) => config.get('database'),
       inject: [ConfigService],

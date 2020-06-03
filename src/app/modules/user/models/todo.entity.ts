@@ -1,8 +1,10 @@
+import { ObjectType } from '@nestjs/graphql';
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import User from './user.entity';
 
 @Index('todo_pkey', ['id'], { unique: true })
 @Entity('todo', { schema: 'public' })
+@ObjectType()
 export class Todo {
   @Column('uuid', {
     primary: true,
@@ -35,5 +37,5 @@ export class Todo {
     lazy: true,
   })
   @JoinColumn([{ name: 'created_by', referencedColumnName: 'id' }])
-  createdBy: Promise<User>;
+  createdBy: User;
 }

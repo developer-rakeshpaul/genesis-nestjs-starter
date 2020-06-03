@@ -1,4 +1,5 @@
-export default {
+import { registerAs } from '@nestjs/config';
+export default registerAs('storage', () => ({
   TYPE_STORAGE_IMAGE: process.env.TYPE_STORAGE,
   ALLOW_AVATAR_FILE: ['image/png', 'image/jpeg'],
 
@@ -24,4 +25,4 @@ export default {
   },
 
   AVATAR_URL: process.env.AVATAR_URL,
-};
+}));

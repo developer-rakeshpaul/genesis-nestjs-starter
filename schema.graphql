@@ -1,0 +1,132 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Todo {
+  id: String!
+  desc: String!
+  isComplete: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  createdBy: User!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type User {
+  id: ID!
+  name: String!
+  username: String
+  email: String!
+  phone: String
+  bio: JSON
+  googleId: String
+  facebookId: String
+  twitterId: String
+  githubId: String
+  imageUrl: String
+  status: String
+  role: String
+  lastLoginAt: String
+  createdAt: DateTime
+  updatedAt: DateTime
+  emailVerified: Boolean!
+  todos: [Todo!]!
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+type AuthPayload {
+  token: String!
+  tokenExpiry: DateTime!
+  user: User!
+}
+
+type StatusWithInfo {
+  status: Boolean!
+  info: JSONObject!
+}
+
+"""
+The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSONObject
+
+type CloudinaryResource {
+  public_id: String
+  format: String
+  version: Float
+  resource_type: String
+  type: String
+  created_at: String
+  bytes: Float
+  width: Float
+  height: Float
+  access_mode: String
+  url: String
+  secure_url: String
+}
+
+type Resources {
+  resources: [CloudinaryResource!]!
+  next_cursor: String!
+}
+
+type Query {
+  me: MeResult!
+  resources: Resources!
+}
+
+union MeResult = User | ValidationResult
+
+type ValidationResult {
+  message: String!
+  code: String!
+}
+
+type Mutation {
+  login(email: String!, password: String, otp: String): LoginResult!
+  sendLoginOTP(email: String!): StatusWithInfo!
+  loginWithOTP(email: String!, password: String, otp: String): LoginResult!
+  logoutfromAllDevices: Boolean!
+  logout: Boolean!
+  forgotPassword(email: String!): MutateUserResult!
+  changePassword(password: String!, currentPassword: String!): MutateUserResult!
+  resetPassword(password: String!, token: String!): MutateUserResult!
+  refreshToken: AuthPayload!
+  signup(userCreateInput: UserCreateInput!): SignupResult!
+  confirm(token: String!): MutateUserResult!
+  resendConfirm(email: String!): MutateUserResult!
+}
+
+union LoginResult = AuthPayload | ValidationResult
+
+union MutateUserResult = ActionResult | ValidationResult
+
+type ActionResult {
+  success: Boolean!
+  info: JSONObject
+}
+
+union SignupResult = AuthPayload | ValidationResult
+
+input UserCreateInput {
+  email: String!
+  password: String
+  name: String!
+  username: String
+  googleId: String
+  facebookId: String
+  twitterId: String
+  githubId: String
+  imageUrl: String
+  role: String
+  status: String
+  lastLoginAt: DateTime
+}

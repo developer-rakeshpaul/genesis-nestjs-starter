@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { readFile } from 'fs';
 import { each } from 'lodash';
 import head from 'lodash.head';
-import { ConfigService } from 'nestjs-config';
+import { ConfigService } from '@nestjs/config';
 import { RedisService } from 'nestjs-redis';
 import {
   createTransport,

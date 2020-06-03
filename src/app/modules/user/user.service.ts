@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import head from 'lodash.head';
-import { ConfigService } from 'nestjs-config';
+import { ConfigService } from '@nestjs/config';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { CryptoService } from '../auth/crypto.service';
 import { USER_STATUS_ACTIVE } from './../../constants';

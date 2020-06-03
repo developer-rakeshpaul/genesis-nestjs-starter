@@ -1,8 +1,8 @@
 import { createUnionType } from '@nestjs/graphql';
-import { ActionResult } from '../../../../core/types/action.type';
-import { ValidationResult } from '../../../../core/types/validation.type';
+import { ActionResult } from '../../../../core/types/action.model';
+import { ValidationResult } from '../../../../core/types/validation.model';
 import { User } from '../models/user.entity';
-import { AuthPayload } from './auth.payload';
+import { AuthPayload } from './auth.payload.model';
 
 export const MutateUserResult = createUnionType({
   name: 'MutateUserResult', // the name of the GraphQL union

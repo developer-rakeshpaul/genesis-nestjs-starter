@@ -1,16 +1,17 @@
-import { StatusWithInfo } from './types/status.info.type';
-import { UseGuards } from '@nestjs/common';
+import { UseGuards, ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { JwtService } from '@nestjs/jwt';
 import { AuthenticationError } from 'apollo-server';
 import get from 'lodash.get';
-import { ConfigService } from 'nestjs-config';
 import { RedisService } from 'nestjs-redis';
-import { MailService } from '../../../core/mailer';
+import { getTestMessageUrl } from 'nodemailer';
 import {
+  MailService,
+  ResolverContext,
   USER_VALIDATION_ERROR,
   VALIDATION_ERROR,
-} from '../../../core/types/validation.type';
+} from '../../../core';
 import { AppService } from '../../app.service';
 import {
   REDIS_CONFIRM_TOKEN_PREFIX,
@@ -18,22 +19,22 @@ import {
   REDIS_LOGIN_OTP_PREFIX,
   USER_STATUS_ACTIVE,
 } from '../../constants';
-import { AuthService } from '../auth/auth.service';
-import { GqlAuthGuard } from '../auth/guards/graphql.auth.guard';
-import { AuthPayload } from './dto/auth.payload';
-import { ChangePasswordArgs } from './dto/change.password.args';
-import { LoginArgs } from './dto/login.args';
-import { ResetPasswordArgs } from './dto/reset.password.args';
-import { UserCreateInput } from './dto/user.create.input';
+import { AuthService, GqlAuthGuard } from '../auth';
 import {
+  AuthPayload,
+  ChangePasswordArgs,
+  LoginArgs,
+  ResetPasswordArgs,
+  UserCreateInput,
   LoginResult,
   MeResult,
   MutateUserResult,
   SignupResult,
-} from './dto/user.union.types';
-import { User } from './models/user.entity';
+} from './dto';
+
+import { User } from './models';
+import { StatusWithInfo } from './types/status.info.type';
 import { UserService } from './user.service';
-import { getTestMessageUrl } from 'nodemailer';
 
 // const emptyValidationResult = { code: null, message: null };
 // const emptyAuthPayload = { token: null, tokenExpiry: null, user: null };
@@ -53,7 +54,7 @@ export class UserResolver {
   @Mutation(() => LoginResult)
   async login(
     @Args() loginArgs: LoginArgs,
-    @Context() ctx,
+    @Context() ctx: ResolverContext,
   ): Promise<typeof LoginResult> {
     console.log(ctx.req.user);
     const { email, password } = loginArgs;
@@ -93,7 +94,6 @@ export class UserResolver {
           ) *
             1000,
       );
-      delete user.password;
       const refreshToken = await this.authService.createRefreshToken(user);
       this.authService.sendRefreshToken(
         ctx.res,
@@ -135,7 +135,7 @@ export class UserResolver {
   @Mutation(() => LoginResult)
   async loginWithOTP(
     @Args() loginArgs: LoginArgs,
-    @Context() ctx,
+    @Context() ctx: ResolverContext,
   ): Promise<typeof LoginResult> {
     const { email, otp } = loginArgs;
     const key = REDIS_LOGIN_OTP_PREFIX + email + otp;
@@ -173,7 +173,6 @@ export class UserResolver {
           ) *
             1000,
       );
-      delete user.password;
       const refreshToken = await this.authService.createRefreshToken(user);
       this.authService.sendRefreshToken(
         ctx.res,
@@ -188,7 +187,7 @@ export class UserResolver {
 
   @Query(() => MeResult)
   @UseGuards(GqlAuthGuard)
-  async me(@Context() ctx): Promise<typeof MeResult> {
+  async me(@Context() ctx: ResolverContext): Promise<typeof MeResult> {
     try {
       const user: User = get(ctx, 'req.user', null);
       if (user) {
@@ -206,7 +205,9 @@ export class UserResolver {
 
   @Mutation(() => Boolean)
   @UseGuards(GqlAuthGuard)
-  async logoutfromAllDevices(@Context() ctx) {
+  async logoutfromAllDevices(
+    @Context() ctx: ResolverContext,
+  ): Promise<boolean> {
     try {
       const user: User = get(ctx, 'req.user', null);
       if (user) {
@@ -226,7 +227,7 @@ export class UserResolver {
 
   @Mutation(() => Boolean)
   @UseGuards(GqlAuthGuard)
-  async logout(@Context() ctx) {
+  async logout(@Context() ctx: ResolverContext): Promise<boolean> {
     try {
       const secure = this.configService.get('api').isSecure;
       ctx.res.cookie('gid', '', {
@@ -284,7 +285,7 @@ export class UserResolver {
   @UseGuards(GqlAuthGuard)
   async changePassword(
     @Args() changePasswordArgs: ChangePasswordArgs,
-    @Context() ctx,
+    @Context() ctx: ResolverContext,
   ): Promise<typeof MutateUserResult> {
     const user = get(ctx, 'req.user', null);
     if (user) {
@@ -354,7 +355,7 @@ export class UserResolver {
   }
 
   @Mutation(() => AuthPayload)
-  async refreshToken(@Context() ctx): Promise<AuthPayload> {
+  async refreshToken(@Context() ctx: ResolverContext): Promise<AuthPayload> {
     const gid = get(ctx, 'req.cookies.gid', null);
     if (!gid) {
       throw new AuthenticationError('Invalid refresh token');
@@ -382,7 +383,6 @@ export class UserResolver {
         ) *
           1000,
     );
-    delete user.password;
     const refreshToken = await this.authService.createRefreshToken(user);
     this.authService.sendRefreshToken(
       ctx.res,
@@ -394,8 +394,9 @@ export class UserResolver {
 
   @Mutation(() => SignupResult)
   async signup(
-    @Args('userCreateInput') userCreateInput: UserCreateInput,
-    @Context() ctx,
+    @Args('userCreateInput', new ValidationPipe())
+    userCreateInput: UserCreateInput,
+    @Context() ctx: ResolverContext,
   ): Promise<typeof SignupResult> {
     try {
       const { email, username, password } = userCreateInput;
@@ -434,7 +435,6 @@ export class UserResolver {
           user.email,
           user.id,
         );
-        console.log(this.configService.get('api').verificationRequired);
         if (!this.configService.get('api').verificationRequired) {
           const loginToken = await this.authService.createToken(user);
           const tokenExpiry = new Date(
@@ -446,7 +446,6 @@ export class UserResolver {
               ) *
                 1000,
           );
-          delete user.password;
           const refreshToken = await this.authService.createRefreshToken(user);
           this.authService.sendRefreshToken(
             ctx.res,
