@@ -12,6 +12,11 @@ export default registerAs('api', () => ({
   secret: process.env.APP_SECRET,
   environment: process.env.NODE_ENV,
   verficationRequired: process.env.LOGIN_WITHOUT_VERIFICATION === 'true',
+  corsOrigin() {
+    return process.env.CORS_ORIGIN
+      ? process.env.CORS_ORIGIN.split(',')
+      : 'http://localhost:3000';
+  },
   emails() {
     if (process.env.SUPER_ADMIN_EMAILS) {
       return process.env.SUPER_ADMIN_EMAILS.split(',');

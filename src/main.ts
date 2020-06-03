@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
@@ -9,14 +10,14 @@ import { AppModule } from './app/app.module';
 (async function bootstrap() {
   try {
     process.on('warning', (e) => console.warn(e.stack));
-    const origin = process.env.CORS_ORIGIN
-      ? process.env.CORS_ORIGIN.split(',')
-      : 'http://localhost:3000';
-    const app = await NestFactory.create(AppModule, {
-      cors: {
-        origin,
-        credentials: true,
-      },
+
+    const app = await NestFactory.create(AppModule);
+    const configService = app.get(ConfigService);
+    const origin = configService.get('api.corsOrigin')();
+
+    app.enableCors({
+      origin,
+      credentials: true,
     });
     app.use(compression());
     app.use(helmet());
@@ -29,12 +30,9 @@ import { AppModule } from './app/app.module';
       }),
     );
 
-    await app.listen(parseInt(process.env.API_PORT, 10) || 4000);
-    console.info(
-      `Application started successfully on port ${
-        parseInt(process.env.API_PORT, 10) || 4000
-      }`,
-    );
+    const port = configService.get('api.port', 4000);
+    await app.listen(port);
+    console.info(`Application started successfully on port ${port}`);
   } catch (error) {
     console.error('error', error);
   }
