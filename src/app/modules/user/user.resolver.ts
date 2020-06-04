@@ -1,8 +1,12 @@
-import { UseGuards, ValidationPipe } from '@nestjs/common';
+import {
+  UseGuards,
+  ValidationPipe,
+  UnauthorizedException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { JwtService } from '@nestjs/jwt';
-import { AuthenticationError } from 'apollo-server';
 import get from 'lodash.get';
 import { RedisService } from 'nestjs-redis';
 import { getTestMessageUrl } from 'nodemailer';
@@ -102,7 +106,7 @@ export class UserResolver {
       );
       return { token, tokenExpiry, user };
     } catch (e) {
-      this.appService.handleInternalError(e);
+      throw new InternalServerErrorException(e);
     }
   }
 
@@ -127,7 +131,7 @@ export class UserResolver {
         },
       };
     } catch (error) {
-      this.appService.handleInternalError(error);
+      throw new InternalServerErrorException(error);
       return { status: false };
     }
   }
@@ -181,7 +185,7 @@ export class UserResolver {
       );
       return { token, tokenExpiry, user };
     } catch (error) {
-      this.appService.handleInternalError(error);
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -199,7 +203,7 @@ export class UserResolver {
         };
       }
     } catch (e) {
-      this.appService.thorwInternalError(e);
+      throw new InternalServerErrorException(e);
     }
   }
 
@@ -216,11 +220,9 @@ export class UserResolver {
           { id: user.id },
         );
         return true;
-      } else {
-        this.appService.throwAuthenticationError();
       }
     } catch (e) {
-      this.appService.handleInternalError(e);
+      throw new InternalServerErrorException(e);
     }
     return false;
   }
@@ -239,7 +241,7 @@ export class UserResolver {
 
       return true;
     } catch (error) {
-      this.appService.handleInternalError(error);
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -276,7 +278,7 @@ export class UserResolver {
         },
       };
     } catch (error) {
-      this.appService.handleInternalError(error);
+      throw new InternalServerErrorException(error);
     }
     return { success: true };
   }
@@ -297,7 +299,7 @@ export class UserResolver {
           currentPassword,
         );
       } catch (error) {
-        this.appService.thorwInternalError(error);
+        throw new InternalServerErrorException(error);
       }
       if (validUser) {
         const newPassword = await this.userService.encrypt(password);
@@ -350,7 +352,7 @@ export class UserResolver {
       await redis.del(key);
       return { success: true };
     } catch (error) {
-      this.appService.handleInternalError(error);
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -358,7 +360,7 @@ export class UserResolver {
   async refreshToken(@Context() ctx: ResolverContext): Promise<AuthPayload> {
     const gid = get(ctx, 'req.cookies.gid', null);
     if (!gid) {
-      throw new AuthenticationError('Invalid refresh token');
+      throw new UnauthorizedException('Invalid refresh token');
     }
 
     let user: User = null;
@@ -367,10 +369,10 @@ export class UserResolver {
       payload = await this.jwtService.verify(gid);
       user = await this.userService.findById(payload.id);
     } catch (err) {
-      this.appService.thorwInternalError(err);
+      throw new UnauthorizedException('Invalid refresh token');
     }
     if (!user || user.tokenVersion !== payload.tokenVersion) {
-      this.appService.throwAuthenticationError('Invalid refresh token');
+      throw new UnauthorizedException('Invalid refresh token');
     }
 
     const token = await this.authService.createToken(user);
@@ -458,7 +460,7 @@ export class UserResolver {
         return { token: '', tokenExpiry: new Date(0), user };
       }
     } catch (error) {
-      this.appService.thorwInternalError(error);
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -488,7 +490,7 @@ export class UserResolver {
       await redis.del(key);
       return { success: true };
     } catch (error) {
-      this.appService.thorwInternalError(error);
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -515,7 +517,7 @@ export class UserResolver {
         },
       };
     } catch (error) {
-      this.appService.thorwInternalError(error);
+      throw new InternalServerErrorException(error);
     }
     return { success: true };
   }

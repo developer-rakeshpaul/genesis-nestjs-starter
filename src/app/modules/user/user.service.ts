@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import head from 'lodash.head';
-import { ConfigService } from '@nestjs/config';
-import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
+import {
+  FindManyOptions,
+  FindOneOptions,
+  Repository,
+  UpdateResult,
+} from 'typeorm';
 import { CryptoService } from '../auth/crypto.service';
 import { USER_STATUS_ACTIVE } from './../../constants';
 import { UserWhereInput } from './dto/user.where.input';
@@ -17,48 +21,55 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly cryptoService: CryptoService,
-    private readonly configService: ConfigService,
   ) {}
 
-  public async update(user: Partial<User>, where: UserWhereInput) {
-    const result = await this.userRepository.update(where, user);
+  public async update(
+    user: Partial<User>,
+    where: UserWhereInput,
+  ): Promise<UpdateResult> {
+    const result: UpdateResult = await this.userRepository.update(where, user);
     return result;
   }
 
-  public async find(criteria: FindManyOptions<User>) {
-    return await this.userRepository.find(criteria);
+  public async find(criteria: FindManyOptions<User>): Promise<Array<User>> {
+    const result: Array<User> = await this.userRepository.find(criteria);
+    return result;
   }
 
-  public async findOne(criteria: FindOneOptions<User>) {
-    const user = await this.userRepository.findOne(criteria);
+  public async findOne(criteria: FindOneOptions<User>): Promise<User> {
+    const user: User = await this.userRepository.findOne(criteria);
     return user;
   }
 
-  public async findById(id: string) {
-    const user = head(await this.userRepository.findByIds([id], { take: 1 }));
+  public async findById(id: string): Promise<User> {
+    const user: User = head(
+      await this.userRepository.findByIds([id], { take: 1 }),
+    );
     return user;
   }
 
-  public async findByEmail(email: string) {
-    const user = await this.userRepository.findOne({ where: { email } });
+  public async findByEmail(email: string): Promise<User> {
+    const user: User = await this.userRepository.findOne({ where: { email } });
     return user;
   }
 
-  public async findByUsername(username: string) {
-    const user = await this.userRepository.findOne({ where: { username } });
+  public async findByUsername(username: string): Promise<User> {
+    const user: User = await this.userRepository.findOne({
+      where: { username },
+    });
     return user;
   }
 
-  public async exists(criteria: FindOneOptions<User>) {
+  public async exists(criteria: FindOneOptions<User>): Promise<boolean> {
     const user = await this.userRepository.findOne(criteria);
     return user ? true : false;
   }
 
-  public async encrypt(password: string) {
+  public async encrypt(password: string): Promise<string> {
     return await this.cryptoService.hashPassword(password);
   }
 
-  public async create(user: Partial<User>) {
+  public async create(user: Partial<User>): Promise<User> {
     let password = user.password;
     if (password) {
       password = await this.cryptoService.hashPassword(user.password);
