@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthenticationError } from 'apollo-server';
-import { Response } from 'express';
 import get from 'lodash.get';
 import { ConfigService } from '@nestjs/config';
 import { User } from '../../modules/user/models/user.entity';
@@ -36,7 +35,7 @@ export class AuthService {
     }
   }
 
-  public async createToken(user: User) {
+  public async createToken(user: User): Promise<string> {
     const timeInMs = Math.floor(Date.now() / 1000);
     const iat = timeInMs - 30;
     const claims = {
@@ -62,7 +61,7 @@ export class AuthService {
     return accessToken;
   }
 
-  public async createRefreshToken(user: User) {
+  public async createRefreshToken(user: User): Promise<string> {
     const timeInMs = Math.floor(Date.now() / 1000);
     const iat = timeInMs - 30;
     const payload = {
@@ -77,7 +76,7 @@ export class AuthService {
     return refreshToken;
   }
 
-  public sendRefreshToken(res: Response, token: string, jwtConfig: any) {
+  public sendRefreshToken(res: any, token: string, jwtConfig: any): void {
     const secure = this.configService.get('api').isSecure;
     res.cookie('gid', token, {
       maxAge:
@@ -101,7 +100,7 @@ export class AuthService {
     return null;
   }
 
-  public async verify(token: string) {
+  public async verify(token: string): Promise<boolean> {
     try {
       const payload: any = await this.jwtService.verify(token);
       const user: User = await this.userService.findById(payload.id);

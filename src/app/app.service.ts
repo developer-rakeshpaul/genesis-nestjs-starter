@@ -1,5 +1,5 @@
 import { v4 } from 'uuid';
-import { ApolloError } from 'apollo-server-express';
+import { ApolloError } from 'apollo-server-fastify';
 import { Injectable } from '@nestjs/common';
 import {
   AuthenticationError,
@@ -32,7 +32,7 @@ export class AppService {
     throw new AuthenticationError(message);
   }
 
-  public throwUserInputError(message: string, properties?: object) {
+  public throwUserInputError(message: string, properties?: any) {
     throw new UserInputError(message, properties);
   }
   public thorwInternalError(error) {

@@ -56,7 +56,6 @@ export class UserResolver {
     @Args() loginArgs: LoginArgs,
     @Context() ctx: ResolverContext,
   ): Promise<typeof LoginResult> {
-    console.log(ctx.req.user);
     const { email, password } = loginArgs;
     const user: User = await this.authService.validateUser(email, password);
 
