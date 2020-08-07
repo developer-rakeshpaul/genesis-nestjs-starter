@@ -55,7 +55,7 @@
     "apollo-server-express": "^2.14.1",
     "argon2": "^0.26.2",
     "aws-sdk": "^2.688.0",
-    "class-transformer": "^0.2.3",
+    "class-transformer": "^0.3.1",
     "class-validator": "^0.12.2",
     "cloudinary": "^1.21.0",
     "compression": "^1.7.4",
